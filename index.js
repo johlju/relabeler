@@ -25,18 +25,17 @@ module.exports = (robot) => {
     robot.log.debug(context.payload.repositories)
   })
 
-  robot.on(['pull_request.opened', 'pull_request.closed'], async context => {
-      robot.log.debug('pull_request event!')
-    // https://developer.github.com/v4/reference/enum/commentauthorassociation/
-    // "author_association": "NONE","OWNER",
+  robot.on(['pull_request.opened', 'pull_request.closed', 'pull_request.edited', 'pull_request.labeled'], async context => {
+    robot.log.debug('pull_request event!')
 
     const action = context.payload.action
     robot.log.debug('Action: %s', action)
 
-    // An issue was just opened.
+    // https://developer.github.com/v4/reference/enum/commentauthorassociation/
+    // "author_association": "NONE","OWNER",
     robot.log.debug('Association: %s', context.payload.pull_request.author_association)
-
   })
+
   robot.on(['issues.opened', 'issues.edited', 'issue_comment.created', 'issue_comment.deleted'], async context => {
     // An issue was just opened.
     robot.log.debug('issues event!')
@@ -44,8 +43,7 @@ module.exports = (robot) => {
     const action = context.payload.action
     robot.log.debug('Action: %s', action)
 
-    //robot.log.debug(context)
-
+    robot.log.debug(context)
   })
 
   robot.on(['status'], async context => {
@@ -54,7 +52,8 @@ module.exports = (robot) => {
 
     // An issue was just opened.
     robot.log.debug('status event!')
-    // robot.log.debug(context)
+    robot.log.debug(context)
   })
-
 }
+
+// Check npm: eslint, codecov, chai
