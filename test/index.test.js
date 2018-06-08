@@ -1,8 +1,9 @@
 // Just used to Describe (What), Context (When), It (Should)
 const context = describe
 
-const fs = require('fs');
+const fs = require('fs')
 const expect = require('expect')
+const path = require('path')
 
 // Requiring probot allows us to mock out a robot instance
 const { createRobot } = require('probot')
@@ -13,8 +14,9 @@ function readMockConfig (fileName) {
   let config
 
   try {
-    config = fs.readFileSync(__dirname + '/configs/' + fileName, 'utf8')
-    //console.log(repoConfig)
+    const filePath = path.resolve(__dirname, 'configs', fileName)
+
+    config = fs.readFileSync(filePath, 'utf8')
   } catch (e) {
     console.log(e)
   }
