@@ -1,0 +1,56 @@
+# Status can be set to either: success, failure, pending or error
+
+onStatusChange:
+- when:
+    statuses:
+      cla-bot: failure
+
+    label: waiting for CLA pass
+
+    # Optional comment written when setting the label
+    commentWhenSettingLabel: >
+      Waiting for CLA.
+      When CLA is signed the PR can be reviewed.
+
+    # Optional, removes all of these labels when setting 'label:'.
+    removeLabels:
+      - needs review
+      - waiting for code fix
+
+- when:
+    statuses:
+      continuous-integration/appveyor/pr: failure
+      license/cla: success
+
+    label: waiting for code fix
+
+    commentWhenSettingLabel: >
+      CI pipeline failed...
+
+    removeLabels:
+      - needs review
+      - waiting for CLA pass
+
+- when:
+    statuses:
+      continuous-integration/appveyor/pr: success
+      cla-bot: success
+
+    label: needs review
+
+    removeLabels:
+      - waiting for code fix
+      - waiting for CLA pass
+
+- when:
+    statuses:
+      code-review/reviewable: success
+      continuous-integration/appveyor/pr: success
+      cla-bot: success
+
+    label: ready to merge
+
+    removeLabels:
+      - waiting for code fix
+      - waiting for CLA pass
+      - needs review

@@ -1,0 +1,42 @@
+# Status can be set to either: success, failure, pending, error or missing.
+onPullRequestStatusChange:
+- when:
+    statuses:
+      WIP: pending
+
+    labels:
+      - waiting for code fix
+
+    commentWhenSettingLabel: >
+      CI pipeline failed...
+
+    removeLabels:
+      - needs review
+      - waiting for CLA pass
+
+    exemptLabels:
+
+- when:
+    statuses:
+      code-review/reviewable: pending
+      WIP: success
+
+    labels:
+      - needs review
+
+    removeLabels:
+      - waiting for code fix
+      - waiting for CLA pass
+
+- when:
+    statuses:
+      code-review/reviewable: success
+      WIP: success
+
+    labels:
+      - ready to merge
+
+    removeLabels:
+      - waiting for code fix
+      - waiting for CLA pass
+      - needs review

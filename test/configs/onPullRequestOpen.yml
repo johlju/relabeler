@@ -1,0 +1,36 @@
+onPullRequestOpen:
+- when:
+    # Status can be set to either: none (first timers), owner.
+    authorAssociations:
+      - none
+
+    labels:
+      - Needs review
+
+    commentWhenSettingLabel: >
+      CI pipeline failed...
+
+    removeLabels:
+      - needs review
+      - waiting for CLA pass
+
+    exemptLabels:
+      - Waiting for CLA pass
+
+- when:
+    # Status can be set to either: none (first timers), owner.
+    authorAssociations:
+      - owner
+
+    labels:
+      - ready to merge
+
+    commentWhenSettingLabel: >
+      CI pipeline failed...
+
+    removeLabels:
+      - needs review
+      - waiting for CLA pass
+
+    exemptLabels:
+      - Waiting for CLA pass
