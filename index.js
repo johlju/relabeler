@@ -120,11 +120,11 @@ module.exports = (robot) => {
   })
 
   async function loadConfig (context) {
-    const repoConfig = await context.config('relabeler.yml')
+    const repositoryConfig = await context.config('relabeler.yml')
 
     let config
 
-    if (!repoConfig) {
+    if (!repositoryConfig) {
       // Do not activate - do dry-run
       config = {
         perform: false
@@ -132,7 +132,7 @@ module.exports = (robot) => {
     } else {
       config = {
         perform: true,
-        ...repoConfig
+        ...repositoryConfig
       }
     }
 
@@ -140,5 +140,3 @@ module.exports = (robot) => {
     return config
   }
 }
-
-// Check npm: eslint, codecov, chai

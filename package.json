@@ -2,25 +2,27 @@
   "name": "relabeler",
   "version": "1.0.0",
   "description": "A GitHub App that is able to label issues and pull requests on events.",
-  "author": "Johan Ljunggren <johan.ljunggren@shamn.se>",
+  "author": "Johan Ljunggren",
   "license": "MIT",
   "repository": "https://github.com/johlju/relabeler.git",
   "scripts": {
     "dev": "nodemon --exec \"npm start\"",
     "start": "probot run ./index.js",
     "lint": "standard --fix",
-    "test": "jest --coverage && standard",
-    "test:watch": "jest --watch --notify --notifyMode=change --coverage"
+    "test": "jest --coverage",
+    "test:watch": "jest --watch --notify --notifyMode=change --coverage",
+    "pretest": "standard",
+    "pretest2": "eslint --ignore-path .gitignore ."
   },
   "dependencies": {
-    "eslint": "^3.19.0",
     "probot": "^6.0.0"
   },
   "devDependencies": {
-    "jest": "^22.4.3",
-    "nodemon": "^1.17.2",
+    "jest": "^23.1.0",
+    "nodemon": "^1.17.5",
     "smee-client": "^1.0.1",
-    "standard": "^10.0.3"
+    "standard": "^11.0.1",
+    "eslint": "^4.19.1"
   },
   "engines": {
     "node": ">= 8.3.0"

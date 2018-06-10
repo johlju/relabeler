@@ -1,3 +1,7 @@
+pulls:
+  daysUntilClose: false
+  only: pulls
+
 onPullRequestOpen:
 - when:
     # Status can be set to either: none (first timers), owner.

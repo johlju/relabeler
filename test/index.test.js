@@ -24,8 +24,31 @@ function readMockConfig (fileName) {
   return config
 }
 
+const testConfig = {
+  pulls: {
+    daysUntilClose: false,
+    only: 'pulls'
+  }
+}
+
+const {daysUntilClose, pulls, logger = console} = testConfig
+const {only} = testConfig.pulls
+console.log('testConfig.pulls.daysUntilClose', testConfig.pulls.daysUntilClose)
+console.log('daysUntilClose', daysUntilClose)
+console.log('only', only)
+console.log('pulls', pulls)
+
+if (daysUntilClose) {
+  console.warn('CLOSE!!')
+} else {
+  logger.warn('DO NOT CLOSE!!')
+}
+
+console.log(testConfig)
 // You can import your modules
 // const index = require('../index')
+
+console.log('env.dry_run', process.env.DRY_RUN)
 
 // Create a fixtures folder in your test folder
 // Then put any larger testing payloads in there
@@ -76,12 +99,13 @@ describe('relabeler', () => {
   context('When pull request is opened', () => {
     context('When executing', () => {
       beforeAll(() => {
-        let repoYamlConfig = readMockConfig('onPullRequestOpen.yml')
+        let repositoryYamlConfig = readMockConfig('onPullRequestOpen.yml')
 
+        // This is used by the GitHub API mock github.repos.getContent.
         configData = {
           data: {
             // This must be encoded in base64
-            content: Buffer.from(repoYamlConfig).toString('base64')
+            content: Buffer.from(repositoryYamlConfig).toString('base64')
           }
         }
       })
@@ -91,7 +115,7 @@ describe('relabeler', () => {
         expect(github.issues.addLabels).toHaveBeenCalledWith({
           labels: ['needs review'],
           number: 11,
-          owner: 'johlju',
+          owner: 'DummyOwner',
           repo: 'DebugApps'
         })
       })
@@ -101,7 +125,7 @@ describe('relabeler', () => {
         expect(github.issues.createComment).toHaveBeenCalledWith({
           body: 'hej',
           number: 11,
-          owner: 'johlju',
+          owner: 'DummyOwner',
           repo: 'DebugApps'
         })
       })
@@ -109,6 +133,7 @@ describe('relabeler', () => {
 
     context('When on dry-run', () => {
       beforeAll(() => {
+        // This is used by the GitHub API mock github.repos.getContent.
         configData = {
           data: {
             // This must be encoded in base64
