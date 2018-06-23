@@ -138,27 +138,91 @@ module.exports = (robot) => {
   })
 
   robot.on(['issues.opened'], async context => {
+    robot.log.trace(context)
+    // An issue was just opened.
+    const action = context.payload.action
+    robot.log.debug('issues event! Action: %s', action)
+
+    const isBot = context.isBot
+    robot.log.debug('issues action was bot: %s', isBot)
+
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open') {
-      // An issue was just opened.
-      const action = context.payload.action
-      robot.log.debug('issues event! Action: %s', action)
+      const config = await loadConfig(context)
 
-      const isBot = context.isBot
-      robot.log.debug('issues action was bot: %s', isBot)
+      robot.log.debug('Configuration (stringify): %s', JSON.stringify(config))
 
-      robot.log.trace(context)
+      const configOnIssueOpen = config.onIssueOpen
 
-      // https://probot.github.io/docs/github-api/#graphql-api
-      // Get the node id of the issue
-      const { resource } = await context.github.query(getResource, {
-        url: context.payload.issue.html_url
-      })
+      robot.log.debug('Config (onIssueOpen): %s', JSON.stringify(configOnIssueOpen))
 
-      // Post a comment on the issue
-      await context.github.query(addComment, {
-        id: resource.id,
-        body: 'Thanks for submitting an issue!'
+      let i = 0
+      configOnIssueOpen.forEach(async onIssueOpenAction => {
+        const when = onIssueOpenAction.when
+        let doAction = false
+
+        i++
+        robot.log.debug('When %s: %s', i, JSON.stringify(when))
+
+        if (when.exemptLabels !== undefined && when.exemptLabels !== false)
+        {
+          robot.log.debug('Exempt label: %s', JSON.stringify(when.exemptLabels))
+
+          let foundLabel = false
+
+          // TODO: Check labels in the array exist.
+          when.exemptLabels.forEach(exemptLabel => {
+            context.payload.issue.labels.forEach(issueLabel =>{
+              robot.log.debug('Issue label: %s', JSON.stringify(issueLabel))
+
+              if (exemptLabel === issueLabel.name)
+              {
+                foundLabel = true
+              }
+            })
+          })
+
+          // If we didn't find a match, then action should be performed.
+          if (!foundLabel)
+          {
+            doAction = true
+          }
+        }
+        else
+        {
+          doAction = true
+        }
+
+        // TODO: Check exempt labels
+        if (doAction)
+        {
+                // https://probot.github.io/docs/github-api/#graphql-api
+          // Get the node id of the issue
+          const { resource } = await context.github.query(getResource, {
+            url: context.payload.issue.html_url
+          })
+
+          if (when.do.setLabels !== undefined && when.do.setLabels !== false)
+          {
+            when.do.setLabels.forEach(async setLabel => {
+              robot.log.debug('Set label %s', JSON.stringify(setLabel))
+
+              // TODO: This should be replaced by graphQL equivalent.
+              context.github.issues.addLabels(context.issue({ labels: [setLabel] }))
+            })
+          }
+
+          if (when.do.comment !== undefined && when.do.comment !== false)
+          {
+            robot.log.debug('Comment %s', JSON.stringify(when.do.comment))
+
+            // Post a comment on the issue
+            await context.github.query(addComment, {
+              id: resource.id,
+              body: when.do.comment
+            })
+          }
+        }
       })
     } else {
       robot.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)

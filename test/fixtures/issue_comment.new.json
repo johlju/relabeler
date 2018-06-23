@@ -1,5 +1,5 @@
 {
-  "event": "issue",
+  "event": "issue_comment",
   "payload": {
     "action": "created",
     "issue": {

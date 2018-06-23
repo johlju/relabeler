@@ -8,15 +8,14 @@ onPullRequestOpen:
     authorAssociations:
       - none
 
-    labels:
-      - Needs review
+    setLabels:
+      - needs review
 
     commentWhenSettingLabel: >
       CI pipeline failed...
 
     removeLabels:
       - needs review
-      - waiting for CLA pass
 
     exemptLabels:
       - Waiting for CLA pass
@@ -26,7 +25,7 @@ onPullRequestOpen:
     authorAssociations:
       - owner
 
-    labels:
+    setLabels:
       - ready to merge
 
     commentWhenSettingLabel: >
@@ -34,7 +33,34 @@ onPullRequestOpen:
 
     removeLabels:
       - needs review
-      - waiting for CLA pass
 
     exemptLabels:
       - Waiting for CLA pass
+
+onIssueOpen:
+- when:
+    labels: false
+    exemptLabels:
+      - breaking change
+
+    do:
+      setLabels:
+        - question
+
+      commentWhenSettingLabel: >
+        A maintainer will look at this as soon as possible.
+
+      comment: >
+        Thank you for submitting an issue to this repository!
+        This issue has been added to the backlog on the Waffle board.
+
+      removeLabels: false
+- when:
+    labels: false
+    exemptLabels: false
+    authorAssociations:
+      - owner
+    do:
+      setLabels: false
+      removeLabels: false
+
