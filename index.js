@@ -1,3 +1,23 @@
+// GraphQL query to get Node id for any resource, which is needed for mutations
+const getResource = `
+  query getResource($url: URI!) {
+    resource(url: $url) {
+      ... on Node {
+        id
+      }
+    }
+  }
+`
+
+// GraphQL query to add a comment
+const addComment = `
+  mutation comment($id: ID!, $body: String!) {
+    addComment(input: {subjectId: $id, body: $body}) {
+      clientMutationId
+    }
+  }
+`
+
 module.exports = (robot) => {
   // Your code here
   robot.log.debug('Yay, the app was loaded!')
@@ -91,7 +111,33 @@ module.exports = (robot) => {
     }
   })
 
-  robot.on(['issues.opened', 'issues.edited', 'issue_comment.created', 'issue_comment.deleted'], async context => {
+  // 'issues.edited', 'issue_comment.deleted'
+  robot.on(['issue_comment.created'], async context => {
+    // TODO: only on opened PR's.
+    if (context.payload.issue.state === 'open' && context.isBot === false) {
+      // An issue was just opened.
+      const action = context.payload.action
+      robot.log.debug('issues event! Action: %s', action)
+
+      robot.log.trace(context)
+
+      // https://probot.github.io/docs/github-api/#graphql-api
+      // Get the node id of the issue
+      const { resource } = await context.github.query(getResource, {
+        url: context.payload.issue.html_url
+      })
+
+      // Post a comment on the issue
+      await context.github.query(addComment, {
+        id: resource.id,
+        body: 'Thanks for commenting on an issue!'
+      })
+    } else {
+      robot.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)
+    }
+  })
+
+  robot.on(['issues.opened'], async context => {
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open') {
       // An issue was just opened.
@@ -102,6 +148,18 @@ module.exports = (robot) => {
       robot.log.debug('issues action was bot: %s', isBot)
 
       robot.log.trace(context)
+
+      // https://probot.github.io/docs/github-api/#graphql-api
+      // Get the node id of the issue
+      const { resource } = await context.github.query(getResource, {
+        url: context.payload.issue.html_url
+      })
+
+      // Post a comment on the issue
+      await context.github.query(addComment, {
+        id: resource.id,
+        body: 'Thanks for submitting an issue!'
+      })
     } else {
       robot.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)
     }
@@ -137,6 +195,7 @@ module.exports = (robot) => {
     }
 
     console.log(config)
+
     return config
   }
 }
