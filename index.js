@@ -127,7 +127,7 @@ module.exports = (robot) => {
         url: context.payload.issue.html_url
       })
 
-      // Post a comment on the issue
+      // Post a comment on the issue.
       await context.github.query(addComment, {
         id: resource.id,
         body: 'Thanks for commenting on an issue!'
