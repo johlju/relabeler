@@ -171,7 +171,7 @@ module.exports = (robot) => {
 
           // TODO: Check labels in the array exist.
           when.exemptLabels.forEach(exemptLabel => {
-            context.payload.issue.labels.forEach(issueLabel =>{
+            context.payload.issue.labels.forEach(issueLabel => {
               robot.log.debug('Issue label: %s', JSON.stringify(issueLabel))
 
               if (exemptLabel === issueLabel.name) {
@@ -205,8 +205,7 @@ module.exports = (robot) => {
             })
           }
 
-          if (when.do.comment !== undefined && when.do.comment !== false)
-          {
+          if (when.do.comment !== undefined && when.do.comment !== false) {
             robot.log.debug('Comment %s', JSON.stringify(when.do.comment))
 
             // Post a comment on the issue
