@@ -18,53 +18,53 @@ const addComment = `
   }
 `
 
-module.exports = (robot) => {
+module.exports = (app) => {
   // Your code here
-  robot.log.debug('Yay, the app was loaded!')
+  app.log.debug('Yay, the app was loaded!')
 
   // For more information on building apps:
   // https://probot.github.io/docs/
 
-  robot.on(['installation.created'], async context => {
+  app.on(['installation.created'], async context => {
     const action = context.payload.action
-    robot.log.debug('installation event! Action: %s', action)
+    app.log.debug('installation event! Action: %s', action)
 
-    robot.log.debug(context.payload.installation.repository_selection)
-    robot.log.debug(context.payload.repositories)
+    app.log.debug(context.payload.installation.repository_selection)
+    app.log.debug(context.payload.repositories)
   })
 
-  robot.on(['integration_installation.created'], async context => {
+  app.on(['integration_installation.created'], async context => {
     const action = context.payload.action
-    robot.log.debug('integration_installation event! Action: %s', action)
+    app.log.debug('integration_installation event! Action: %s', action)
 
-    robot.log.debug(context.payload.installation.repository_selection)
-    robot.log.debug(context.payload.repositories)
+    app.log.debug(context.payload.installation.repository_selection)
+    app.log.debug(context.payload.repositories)
   })
 
   // 'pull_request.labeled', 'pull_request.unlabeled' (must handle state === 'open')
   // pull_request.synchronize, 'pull_request.reopened', 'pull_request.edited'
-  robot.on(['pull_request.opened'], async context => {
+  app.on(['pull_request.opened'], async context => {
     if (context.payload.pull_request.state === 'open') {
       const config = await loadConfig(context)
-      robot.log.debug('Configuration: %s', JSON.stringify(config))
+      app.log.debug('Configuration: %s', JSON.stringify(config))
 
       const action = context.payload.action
-      robot.log.debug('pull_request event! Action: %s', action)
+      app.log.debug('pull_request event! Action: %s', action)
 
       const isBot = context.isBot
-      robot.log.debug('pull_request action was bot: %s', isBot)
+      app.log.debug('pull_request action was bot: %s', isBot)
 
       // https://developer.github.com/v4/reference/enum/commentauthorassociation/
       // "author_association": "NONE","OWNER",
-      robot.log.debug('Association: %s', context.payload.pull_request.author_association)
+      app.log.debug('Association: %s', context.payload.pull_request.author_association)
 
       // https://developer.github.com/changes/2018-05-30-end-jean-grey-preview/
-      // robot.log.debug('Global node ID: %s', context.payload.node_id)
+      // app.log.debug('Global node ID: %s', context.payload.node_id)
 
       if (config.perform) {
         context.github.issues.createComment(context.issue({ body: 'hej' }))
       } else {
-        robot.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
+        app.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
       }
 
       const label = 'needs review'
@@ -72,34 +72,34 @@ module.exports = (robot) => {
       if (config.perform) {
         context.github.issues.addLabels(context.issue({ labels: [label] }))
       } else {
-        robot.log.debug('dry-run: Would have labeled PR #%s with a label \'%s\'', context.payload.number, label)
+        app.log.debug('dry-run: Would have labeled PR #%s with a label \'%s\'', context.payload.number, label)
       }
     } else {
-      robot.log.debug('Will not do any actions on closed pull request #%s.', context.payload.pull_request.number)
+      app.log.debug('Will not do any actions on closed pull request #%s.', context.payload.pull_request.number)
     }
   })
 
-  robot.on(['pull_request.closed'], async context => {
+  app.on(['pull_request.closed'], async context => {
     const config = await loadConfig(context)
-    robot.log.debug('Configuration: %s', JSON.stringify(config))
+    app.log.debug('Configuration: %s', JSON.stringify(config))
 
     const action = context.payload.action
-    robot.log.debug('pull_request event! Action: %s', action)
+    app.log.debug('pull_request event! Action: %s', action)
 
     const isBot = context.isBot
-    robot.log.debug('pull_request action was bot: %s', isBot)
+    app.log.debug('pull_request action was bot: %s', isBot)
 
     // https://developer.github.com/v4/reference/enum/commentauthorassociation/
     // "author_association": "NONE","OWNER",
-    robot.log.debug('Association: %s', context.payload.pull_request.author_association)
+    app.log.debug('Association: %s', context.payload.pull_request.author_association)
 
     // https://developer.github.com/changes/2018-05-30-end-jean-grey-preview/
-    // robot.log.debug('Global node ID: %s', context.payload.node_id)
+    // app.log.debug('Global node ID: %s', context.payload.node_id)
 
     if (config.perform) {
       // context.github.issues.createComment(context.issue({body: 'hej'}))
     } else {
-      robot.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
+      app.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
     }
 
     const label = 'needs review'
@@ -107,19 +107,19 @@ module.exports = (robot) => {
     if (config.perform) {
       // context.github.issues.addLabels(context.issue({labels: [label]}))
     } else {
-      robot.log.debug('dry-run: Would have labeled PR #%s with a label \'%s\'', context.payload.number, label)
+      app.log.debug('dry-run: Would have labeled PR #%s with a label \'%s\'', context.payload.number, label)
     }
   })
 
   // 'issues.edited', 'issue_comment.deleted'
-  robot.on(['issue_comment.created'], async context => {
+  app.on(['issue_comment.created'], async context => {
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open' && context.isBot === false) {
       // An issue was just opened.
       const action = context.payload.action
-      robot.log.debug('issues event! Action: %s', action)
+      app.log.debug('issues event! Action: %s', action)
 
-      robot.log.trace(context)
+      app.log.trace(context)
 
       // https://probot.github.io/docs/github-api/#graphql-api
       // Get the node id of the issue
@@ -133,28 +133,28 @@ module.exports = (robot) => {
         body: 'Thanks for commenting on an issue!'
       })
     } else {
-      robot.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)
+      app.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)
     }
   })
 
-  robot.on(['issues.opened'], async context => {
-    robot.log.trace(context)
+  app.on(['issues.opened'], async context => {
+    app.log.trace(context)
     // An issue was just opened.
     const action = context.payload.action
-    robot.log.debug('issues event! Action: %s', action)
+    app.log.debug('issues event! Action: %s', action)
 
     const isBot = context.isBot
-    robot.log.debug('issues action was bot: %s', isBot)
+    app.log.debug('issues action was bot: %s', isBot)
 
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open') {
       const config = await loadConfig(context)
 
-      robot.log.debug('Configuration (stringify): %s', JSON.stringify(config))
+      app.log.debug('Configuration (stringify): %s', JSON.stringify(config))
 
       const configOnIssueOpen = config.onIssueOpen
 
-      robot.log.debug('Config (onIssueOpen): %s', JSON.stringify(configOnIssueOpen))
+      app.log.debug('Config (onIssueOpen): %s', JSON.stringify(configOnIssueOpen))
 
       let i = 0
       configOnIssueOpen.forEach(async onIssueOpenAction => {
@@ -162,17 +162,17 @@ module.exports = (robot) => {
         let doAction = false
 
         i++
-        robot.log.debug('When %s: %s', i, JSON.stringify(when))
+        app.log.debug('When %s: %s', i, JSON.stringify(when))
 
         if (when.exemptLabels !== undefined && when.exemptLabels !== false) {
-          robot.log.debug('Exempt label: %s', JSON.stringify(when.exemptLabels))
+          app.log.debug('Exempt label: %s', JSON.stringify(when.exemptLabels))
 
           let foundLabel = false
 
           // TODO: Check labels in the array exist.
           when.exemptLabels.forEach(exemptLabel => {
             context.payload.issue.labels.forEach(issueLabel => {
-              robot.log.debug('Issue label: %s', JSON.stringify(issueLabel))
+              app.log.debug('Issue label: %s', JSON.stringify(issueLabel))
 
               if (exemptLabel === issueLabel.name) {
                 foundLabel = true
@@ -198,7 +198,7 @@ module.exports = (robot) => {
 
           if (when.do.setLabels !== undefined && when.do.setLabels !== false) {
             when.do.setLabels.forEach(async setLabel => {
-              robot.log.debug('Set label %s', JSON.stringify(setLabel))
+              app.log.debug('Set label %s', JSON.stringify(setLabel))
 
               // TODO: This should be replaced by graphQL equivalent.
               context.github.issues.addLabels(context.issue({ labels: [setLabel] }))
@@ -206,7 +206,7 @@ module.exports = (robot) => {
           }
 
           if (when.do.comment !== undefined && when.do.comment !== false) {
-            robot.log.debug('Comment %s', JSON.stringify(when.do.comment))
+            app.log.debug('Comment %s', JSON.stringify(when.do.comment))
 
             // Post a comment on the issue
             await context.github.query(addComment, {
@@ -217,20 +217,20 @@ module.exports = (robot) => {
         }
       })
     } else {
-      robot.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)
+      app.log.debug('Will not do any actions on closed issue or pull request (number #%s).', context.payload.issue.number)
     }
   })
 
-  robot.on(['status'], async context => {
+  app.on(['status'], async context => {
     const action = context.payload.action
-    robot.log.debug('Action: %s', action)
+    app.log.debug('Action: %s', action)
 
     const isBot = context.isBot
-    robot.log.debug('status action was bot: %s', isBot)
+    app.log.debug('status action was bot: %s', isBot)
 
     // An issue was just opened.
-    robot.log.debug('status event!')
-    robot.log.trace(context)
+    app.log.debug('status event!')
+    app.log.trace(context)
   })
 
   async function loadConfig (context) {
