@@ -164,8 +164,7 @@ module.exports = (robot) => {
         i++
         robot.log.debug('When %s: %s', i, JSON.stringify(when))
 
-        if (when.exemptLabels !== undefined && when.exemptLabels !== false)
-        {
+        if (when.exemptLabels !== undefined && when.exemptLabels !== false) {
           robot.log.debug('Exempt label: %s', JSON.stringify(when.exemptLabels))
 
           let foundLabel = false
@@ -175,35 +174,29 @@ module.exports = (robot) => {
             context.payload.issue.labels.forEach(issueLabel =>{
               robot.log.debug('Issue label: %s', JSON.stringify(issueLabel))
 
-              if (exemptLabel === issueLabel.name)
-              {
+              if (exemptLabel === issueLabel.name) {
                 foundLabel = true
               }
             })
           })
 
           // If we didn't find a match, then action should be performed.
-          if (!foundLabel)
-          {
+          if (!foundLabel) {
             doAction = true
           }
-        }
-        else
-        {
+        } else {
           doAction = true
         }
 
         // TODO: Check exempt labels
-        if (doAction)
-        {
-                // https://probot.github.io/docs/github-api/#graphql-api
+        if (doAction) {
+          // https://probot.github.io/docs/github-api/#graphql-api
           // Get the node id of the issue
           const { resource } = await context.github.query(getResource, {
             url: context.payload.issue.html_url
           })
 
-          if (when.do.setLabels !== undefined && when.do.setLabels !== false)
-          {
+          if (when.do.setLabels !== undefined && when.do.setLabels !== false) {
             when.do.setLabels.forEach(async setLabel => {
               robot.log.debug('Set label %s', JSON.stringify(setLabel))
 

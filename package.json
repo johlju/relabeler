@@ -8,11 +8,10 @@
   "scripts": {
     "dev": "nodemon --exec \"npm start\"",
     "start": "probot run ./index.js",
-    "lint": "standard --fix",
+    "lint": "standard --fix --verbose | snazzy",
     "test": "jest --coverage",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage",
-    "pretest": "standard",
-    "pretest2": "eslint --ignore-path .gitignore ."
+    "pretest": "standard --verbose | snazzy"
   },
   "dependencies": {
     "probot": "^6.2.0"
@@ -22,7 +21,8 @@
     "nodemon": "^1.17.5",
     "smee-client": "^1.0.1",
     "standard": "^11.0.1",
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "snazzy": "^7.1.1"
   },
   "engines": {
     "node": ">= 8.3.0"
