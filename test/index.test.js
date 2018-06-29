@@ -5,10 +5,11 @@ const fs = require('fs')
 const expect = require('expect')
 const path = require('path')
 
-// Requiring probot allows us to mock out a robot instance
-const { createRobot } = require('probot')
+// Requiring probot allows us to mock out a app instance
+const { Application } = require('probot')
+
 // Requiring our app
-const app = require('..')
+const plugin = require('..')
 
 function readMockConfig (fileName) {
   let config
@@ -60,16 +61,16 @@ const payload = {
 }
 
 describe('relabeler', () => {
-  let robot
+  let app
   let github
   let configData
 
   beforeEach(() => {
-    // Here we create a robot instance
-    robot = createRobot()
+    // Here we create an `Application` instance
+    app = new Application()
 
-    // Here we initialize the app on the robot instance
-    app(robot)
+    // Here we initialize the app
+    app.load(plugin)
 
     // This is an easy way to mock out the GitHub API
     // mocks context.github*
@@ -92,8 +93,8 @@ describe('relabeler', () => {
       }
     }
 
-    // Passes the mocked out GitHub API into out robot instance
-    robot.auth = () => Promise.resolve(github)
+    // Passes the mocked out GitHub API into out app instance
+    app.auth = () => Promise.resolve(github)
   })
 
   context('When pull request is opened', () => {
@@ -111,7 +112,7 @@ describe('relabeler', () => {
       })
 
       it('Should set the correct label', async () => {
-        await robot.receive(payload.pullRequest.openedAsOwner)
+        await app.receive(payload.pullRequest.openedAsOwner)
         expect(github.issues.addLabels).toHaveBeenCalledWith({
           labels: ['needs review'],
           number: 11,
@@ -121,7 +122,7 @@ describe('relabeler', () => {
       })
 
       it('Should write correct comment', async () => {
-        await robot.receive(payload.pullRequest.openedAsOwner)
+        await app.receive(payload.pullRequest.openedAsOwner)
         expect(github.issues.createComment).toHaveBeenCalledWith({
           body: 'hej',
           number: 11,
@@ -146,13 +147,13 @@ describe('relabeler', () => {
       })
 
       it('Should not set the correct label', async () => {
-        await robot.receive(payload.pullRequest.openedAsOwner)
+        await app.receive(payload.pullRequest.openedAsOwner)
 
         expect(github.issues.addLabels).not.toHaveBeenCalled()
       })
 
       it('Should not write correct comment', async () => {
-        await robot.receive(payload.pullRequest.openedAsOwner)
+        await app.receive(payload.pullRequest.openedAsOwner)
 
         expect(github.issues.createComment).not.toHaveBeenCalled()
       })
