@@ -1,6 +1,5 @@
 // package.json
 {
-  …
   "greenkeeper": {
     "ignore": [
       "eslint"
