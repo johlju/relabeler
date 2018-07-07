@@ -1,7 +1,5 @@
 {
-  "greenkeeper": {
-    "ignore": [
-      "eslint"
-    ]
-  }
+  "ignore": [
+    "eslint"
+  ]
 }
