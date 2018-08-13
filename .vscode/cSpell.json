@@ -1,10 +1,11 @@
 {
-    "cSpell.words": [
+    "words": [
         "gitignore",
         "probot",
         "relabeler",
         "repo",
         "repos",
-        "smee"
+        "smee",
+        "mergeable"
     ]
 }
