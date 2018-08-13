@@ -1,0 +1,89 @@
+# Could it use "dry-run" of all rules, going throughout all labels, and finally coming out how the PR should be set.
+# What labels it should set and remove after all rules has been evaluated. Then it only set everything once, so
+# there are not unnecessary events kicked off.
+# It could also, mock the set, running the rules on the new labels, to make sure there are no cyclic events
+# if it detects more than 3 cycles, it won't set. Making sure a configuration cannot loop forever.
+
+# Should look for if label is set, or not set.
+pulls:
+  labels:
+  - label:
+    name: waiting for code fix
+      # if not set, check if if it should be set.
+    add:
+    - when:
+      statuses:
+        continuous-integration/appveyor/pr: failure
+        license/cla: success
+    - when:
+      statuses:
+        license/cla: success
+      mergeable: no
+    - when:
+      statuses:
+        license/cla: success
+      reviewRequestChange: yes # Means GitHub Review comment (change without LGTM comment, or blocked)
+    # if set, check if if it should be unset.
+    remove:
+    - when:
+      statuses:
+        continuous-integration/appveyor/pr: success
+        license/cla: success
+      mergeable: yes
+      # To determine this, maybe each review comment int he PR must be evaluated, to finally get true or false.
+      reviewResponseToRequestChange: yes # Means one or more GitHub review comments that starts with 'Done'.
+      # onPush: yes # Should be a key too.
+
+  - label:
+    name: waiting for CLA pass
+      # if not set, check if if it should be set.
+    add:
+    - when:
+      statuses:
+        license/cla: pending
+      # if set, check if if it should be unset.
+    remove:
+    - when:
+      statuses:
+        license/cla: success
+
+  - label:
+    name: needs review
+      # if not set, check if if it should be set.
+    add:
+    - when:
+      statuses:
+        continuous-integration/appveyor/pr: success
+        license/cla: success
+      mergeable: yes
+      reviewResponseToRequestChange: yes
+      notlabeled:
+        - waiting for author response
+      # if set, check if if it should be unset.
+    remove:
+    - when:
+      statuses:
+        continuous-integration/appveyor/pr: failure
+    - when:
+      statuses:
+        license/cla: pending
+    - when:
+      mergeable: yes
+    - when:
+      labeled: waiting for author response
+
+  - label:
+    name: ready for merge
+    add:
+    - when:
+      notlabeled:
+        - waiting for CLA pass
+        - waiting for author response
+        - waiting for code fix
+      reviewApproved: yes # This could check that only be true if there are no pushes after last approval.
+    remove:
+    - when:
+      labeled:
+        - waiting for CLA pass
+        - waiting for author response
+        - waiting for code fix
