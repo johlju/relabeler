@@ -1,4 +1,4 @@
-# relabeler
+# relabeler (Work in Progess)
 
 A GitHub App (built with [probot](https://github.com/probot/probot)) that is
 able to label issues and pull requests on events.
