@@ -9,7 +9,7 @@ const path = require('path')
 const { Application } = require('probot')
 
 // Requiring our app
-const plugin = require('..')
+const relabeler = require('..')
 
 function readMockConfig (fileName) {
   let config
@@ -51,8 +51,8 @@ console.log(testConfig)
 
 console.log('env.dry_run', process.env.DRY_RUN)
 
-// Create a fixtures folder in your test folder
-// Then put any larger testing payloads in there
+// Create a fixtures folder in your test folder, then put any larger testing
+// payloads in there.
 const payload = {
   pullRequest: {
     openedAsOwner: require('./fixtures/pull_request.opened.owner'),
@@ -70,7 +70,7 @@ describe('relabeler', () => {
     app = new Application()
 
     // Here we initialize the app
-    app.load(plugin)
+    app.load(relabeler)
 
     // This is an easy way to mock out the GitHub API
     // mocks context.github*
@@ -112,7 +112,11 @@ describe('relabeler', () => {
       })
 
       it('Should set the correct label', async () => {
-        await app.receive(payload.pullRequest.openedAsOwner)
+        await app.receive({
+          name: 'pull_request.opened',
+          payload: payload.pullRequest.openedAsOwner
+        })
+
         expect(github.issues.addLabels).toHaveBeenCalledWith({
           labels: ['needs review'],
           number: 11,
@@ -122,7 +126,11 @@ describe('relabeler', () => {
       })
 
       it('Should write correct comment', async () => {
-        await app.receive(payload.pullRequest.openedAsOwner)
+        await app.receive({
+          name: 'pull_request.opened',
+          payload: payload.pullRequest.openedAsOwner
+        })
+
         expect(github.issues.createComment).toHaveBeenCalledWith({
           body: 'hej',
           number: 11,
@@ -147,13 +155,19 @@ describe('relabeler', () => {
       })
 
       it('Should not set the correct label', async () => {
-        await app.receive(payload.pullRequest.openedAsOwner)
+        await app.receive({
+          name: 'pull_request.opened',
+          payload: payload.pullRequest.openedAsOwner
+        })
 
         expect(github.issues.addLabels).not.toHaveBeenCalled()
       })
 
       it('Should not write correct comment', async () => {
-        await app.receive(payload.pullRequest.openedAsOwner)
+        await app.receive({
+          name: 'pull_request.opened',
+          payload: payload.pullRequest.openedAsOwner
+        })
 
         expect(github.issues.createComment).not.toHaveBeenCalled()
       })

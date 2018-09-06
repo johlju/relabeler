@@ -25,7 +25,7 @@ module.exports = (app) => {
   // For more information on building apps:
   // https://probot.github.io/docs/
 
-  app.on(['installation.created'], async context => {
+  app.on('installation.created', async context => {
     const action = context.payload.action
     app.log.debug('installation event! Action: %s', action)
 
@@ -43,7 +43,10 @@ module.exports = (app) => {
 
   // 'pull_request.labeled', 'pull_request.unlabeled' (must handle state === 'open')
   // pull_request.synchronize, 'pull_request.reopened', 'pull_request.edited'
-  app.on(['pull_request.opened'], async context => {
+  app.on('pull_request.opened', async context => {
+    context.log({event: context.event, action: context.payload.action})
+    context.log({state: context.payload.pull_request.state})
+
     if (context.payload.pull_request.state === 'open') {
       const config = await loadConfig(context)
       app.log.debug('Configuration: %s', JSON.stringify(config))
@@ -79,7 +82,7 @@ module.exports = (app) => {
     }
   })
 
-  app.on(['pull_request.closed'], async context => {
+  app.on('pull_request.closed', async context => {
     const config = await loadConfig(context)
     app.log.debug('Configuration: %s', JSON.stringify(config))
 
@@ -112,7 +115,7 @@ module.exports = (app) => {
   })
 
   // 'issues.edited', 'issue_comment.deleted'
-  app.on(['issue_comment.created'], async context => {
+  app.on('issue_comment.created', async context => {
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open' && context.isBot === false) {
       // An issue was just opened.
@@ -137,7 +140,7 @@ module.exports = (app) => {
     }
   })
 
-  app.on(['issues.opened'], async context => {
+  app.on('issues.opened', async context => {
     app.log.trace(context)
     // An issue was just opened.
     const action = context.payload.action
@@ -221,7 +224,7 @@ module.exports = (app) => {
     }
   })
 
-  app.on(['status'], async context => {
+  app.on('status', async context => {
     const action = context.payload.action
     app.log.debug('Action: %s', action)
 
