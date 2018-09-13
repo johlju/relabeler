@@ -32,8 +32,8 @@ const testConfig = {
   }
 }
 
-const {daysUntilClose, pulls, logger = console} = testConfig
-const {only} = testConfig.pulls
+const { daysUntilClose, pulls, logger = console } = testConfig
+const { only } = testConfig.pulls
 console.log('testConfig.pulls.daysUntilClose', testConfig.pulls.daysUntilClose)
 console.log('daysUntilClose', daysUntilClose)
 console.log('only', only)

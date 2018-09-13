@@ -44,8 +44,8 @@ module.exports = (app) => {
   // 'pull_request.labeled', 'pull_request.unlabeled' (must handle state === 'open')
   // pull_request.synchronize, 'pull_request.reopened', 'pull_request.edited'
   app.on('pull_request.opened', async context => {
-    context.log({event: context.event, action: context.payload.action})
-    context.log({state: context.payload.pull_request.state})
+    context.log({ event: context.event, action: context.payload.action })
+    context.log({ state: context.payload.pull_request.state })
 
     if (context.payload.pull_request.state === 'open') {
       const config = await loadConfig(context)
