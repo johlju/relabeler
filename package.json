@@ -14,7 +14,7 @@
     "pretest": "standard --verbose | snazzy"
   },
   "dependencies": {
-    "probot": "^7.3.0"
+    "probot": "^9.2.11"
   },
   "devDependencies": {
     "jest": "^23.1.0",
