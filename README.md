@@ -9,7 +9,7 @@ able to label issues and pull requests on events.
 
 ### master
 
-[![Build Status](https://travis-ci.com/johlju/relabeler.svg?branch=master)](https://travis-ci.com/johlju/relabeler) [![GreenKeeper badge](https://badges.greenkeeper.io/johlju/relabeler.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.com/johlju/relabeler.svg?branch=master)](https://travis-ci.com/johlju/relabeler) 
 
 ## Install
 
