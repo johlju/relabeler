@@ -94,8 +94,8 @@ describe('relabeler', () => {
         // await context.config('relabeler.yml') is reding the key getContent.
         //
         // configData is set in the beforeAll()-block in each context.
-        // getContent: jest.fn().mockReturnValue(Promise.resolve(configData))
-        getContent: jest.fn().mockReturnValue(Promise.resolve(configData))
+        // getContents: jest.fn().mockReturnValue(Promise.resolve(configData))
+        getContents: jest.fn().mockReturnValue(Promise.resolve(configData))
       }
     }
 
@@ -126,7 +126,7 @@ describe('relabeler', () => {
       beforeAll(() => {
         const repositoryYamlConfig = readMockConfig('onPullRequestOpen.yml')
 
-        // This is used by the GitHub API mock github.repos.getContent.
+        // This is used by the GitHub API mock github.repos.getContents.
         configData = {
           data: {
             // This must be encoded in base64
@@ -166,7 +166,7 @@ describe('relabeler', () => {
 
     context('When on dry-run', () => {
       beforeAll(() => {
-        // This is used by the GitHub API mock github.repos.getContent.
+        // This is used by the GitHub API mock github.repos.getContents.
         configData = {
           data: {
             // This must be encoded in base64

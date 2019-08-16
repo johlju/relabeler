@@ -48,14 +48,7 @@ module.exports = (app) => {
     context.log({ state: context.payload.pull_request.state })
 
     if (context.payload.pull_request.state === 'open') {
-      let config = await context.config('relabeler.yml', { perform: false })
-
-      if (typeof config.perform === 'undefined') {
-        config = {
-          perform: true,
-          ...config
-        }
-      }
+      const config = await loadConfig(context)
 
       app.log.debug('Configuration: %s', JSON.stringify(config))
 
@@ -97,7 +90,8 @@ module.exports = (app) => {
   })
 
   app.on('pull_request.closed', async context => {
-    const config = await context.config('relabeler.yml', { perform: false })
+    const config = await loadConfig(context)
+
     app.log.debug('Configuration: %s', JSON.stringify(config))
 
     const action = context.payload.action
@@ -165,7 +159,7 @@ module.exports = (app) => {
 
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open') {
-      const config = await context.config('relabeler.yml', { perform: false })
+      const config = await loadConfig(context)
 
       app.log.debug('Configuration (stringify): %s', JSON.stringify(config))
 
@@ -250,31 +244,31 @@ module.exports = (app) => {
     app.log.trace(context)
   })
 
-  // async function loadConfig (context) {
-  //   // Will look for 'relabeler.yml' inside the '.github' folder
-  //   const repositoryConfig = await context.config('relabeler.yml')
+  async function loadConfig (context) {
+    // Will look for 'relabeler.yml' inside the '.github' folder
+    const repositoryConfig = await context.config('relabeler.yml')
 
-  //   // Above supports default config
-  //   //  public async config<T> (fileName: string, defaultConfig?: T) {
-  //   // https://github.com/probot/probot/pull/975/files
+    // Above supports default config
+    //  public async config<T> (fileName: string, defaultConfig?: T) {
+    // https://github.com/probot/probot/pull/975/files
 
-  //   let config
+    let config
 
-  //   if (!repositoryConfig) {
-  //     // Do not activate - do dry-run
-  //     config = {
-  //       perform: false
-  //     }
-  //   } else {
-  //     config = {
-  //       perform: true,
-  //       ...repositoryConfig
-  //     }
-  //   }
+    if (!repositoryConfig) {
+      // Do not activate - do dry-run
+      config = {
+        perform: false
+      }
+    } else {
+      config = {
+        perform: true,
+        ...repositoryConfig
+      }
+    }
 
-  //   context.log(config, 'Loaded config')
-  //   console.log(config)
+    // context.log(config, 'Loaded config')
+    // console.log(config)
 
-  //   return config
-  // }
+    return config
+  }
 }
