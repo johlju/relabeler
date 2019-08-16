@@ -1,15 +1,18 @@
-// Just used to Describe (What), Context (When), It (Should)
-const context = describe
+const nock = require('nock')
+
+const expect = require('expect')
 
 const fs = require('fs')
-const expect = require('expect')
 const path = require('path')
 
 // Requiring probot allows us to mock out a app instance
-const { Application } = require('probot')
+const { Probot } = require('probot')
 
-// Requiring our app
+// Requiring our app implementation
 const relabeler = require('..')
+
+// Just used to Describe (What), Context (When), It (Should)
+const context = describe
 
 function readMockConfig (fileName) {
   let config
@@ -61,16 +64,19 @@ const payload = {
 }
 
 describe('relabeler', () => {
-  let app
+  let probot
   let github
   let configData
 
   beforeEach(() => {
-    // Here we create an `Application` instance
-    app = new Application()
+    // Here we create a Probot instance
+    probot = new Probot({})
 
-    // Here we initialize the app
-    app.load(relabeler)
+    // Load our app into probot
+    const app = probot.load(relabeler)
+
+    // just return a test token (för nock test "creates a passing check")
+    app.app = () => 'test'
 
     // This is an easy way to mock out the GitHub API
     // mocks context.github*
@@ -97,10 +103,28 @@ describe('relabeler', () => {
     app.auth = () => Promise.resolve(github)
   })
 
+  test('creates a passing check', async () => {
+    // Test that we correctly return a test token
+    nock('https://api.github.com')
+      .post('/app/installations/2/access_tokens')
+      .reply(200, { token: 'test' })
+
+    // // Test that a commented is posted
+    // nock('https://api.github.com')
+    //   .post('/repos/hiimbex/testing-things/issues/1/comments', (body) => {
+    //     expect(body).toMatchObject(issueCreatedBody)
+    //     return true
+    //   })
+    //   .reply(200)
+
+    // // Receive a webhook event
+    // await probot.receive({ name: 'issues', payload })
+  })
+
   context('When pull request is opened', () => {
     context('When executing', () => {
       beforeAll(() => {
-        let repositoryYamlConfig = readMockConfig('onPullRequestOpen.yml')
+        const repositoryYamlConfig = readMockConfig('onPullRequestOpen.yml')
 
         // This is used by the GitHub API mock github.repos.getContent.
         configData = {
@@ -112,7 +136,7 @@ describe('relabeler', () => {
       })
 
       it('Should set the correct label', async () => {
-        await app.receive({
+        await probot.receive({
           name: 'pull_request.opened',
           payload: payload.pullRequest.openedAsOwner
         })
@@ -126,7 +150,7 @@ describe('relabeler', () => {
       })
 
       it('Should write correct comment', async () => {
-        await app.receive({
+        await probot.receive({
           name: 'pull_request.opened',
           payload: payload.pullRequest.openedAsOwner
         })
@@ -155,7 +179,7 @@ describe('relabeler', () => {
       })
 
       it('Should not set the correct label', async () => {
-        await app.receive({
+        await probot.receive({
           name: 'pull_request.opened',
           payload: payload.pullRequest.openedAsOwner
         })
@@ -164,7 +188,7 @@ describe('relabeler', () => {
       })
 
       it('Should not write correct comment', async () => {
-        await app.receive({
+        await probot.receive({
           name: 'pull_request.opened',
           payload: payload.pullRequest.openedAsOwner
         })

@@ -1,13 +1,13 @@
 // GraphQL query to get Node id for any resource, which is needed for mutations
-const getResource = `
-  query getResource($url: URI!) {
-    resource(url: $url) {
-      ... on Node {
-        id
-      }
-    }
-  }
-`
+// const getResource = `
+//   query getResource($url: URI!) {
+//     resource(url: $url) {
+//       ... on Node {
+//         id
+//       }
+//     }
+//   }
+// `
 
 // GraphQL query to add a comment
 const addComment = `
@@ -41,14 +41,22 @@ module.exports = (app) => {
     app.log.debug(context.payload.repositories)
   })
 
-  // 'pull_request.labeled', 'pull_request.unlabeled' (must handle state === 'open')
-  // pull_request.synchronize, 'pull_request.reopened', 'pull_request.edited'
+  // ['pull_request.labeled', 'pull_request.unlabeled'] (must handle state === 'open')
+  // ['pull_request.synchronize', 'pull_request.reopened', 'pull_request.edited' ]
   app.on('pull_request.opened', async context => {
     context.log({ event: context.event, action: context.payload.action })
     context.log({ state: context.payload.pull_request.state })
 
     if (context.payload.pull_request.state === 'open') {
-      const config = await loadConfig(context)
+      let config = await context.config('relabeler.yml', { perform: false })
+
+      if (typeof config.perform === 'undefined') {
+        config = {
+          perform: true,
+          ...config
+        }
+      }
+
       app.log.debug('Configuration: %s', JSON.stringify(config))
 
       const action = context.payload.action
@@ -65,7 +73,13 @@ module.exports = (app) => {
       // app.log.debug('Global node ID: %s', context.payload.node_id)
 
       if (config.perform) {
-        context.github.issues.createComment(context.issue({ body: 'hej' }))
+        // `context` extracts information from the event, which can be passed to
+        // GitHub API calls. This will return:
+        //   { owner: 'yourname', repo: 'yourrepo', number: 123, body: 'hej'}
+        const params = context.issue({ body: 'hej' })
+
+        // Post a comment on the issue
+        context.github.issues.createComment(params)
       } else {
         app.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
       }
@@ -83,7 +97,7 @@ module.exports = (app) => {
   })
 
   app.on('pull_request.closed', async context => {
-    const config = await loadConfig(context)
+    const config = await context.config('relabeler.yml', { perform: false })
     app.log.debug('Configuration: %s', JSON.stringify(config))
 
     const action = context.payload.action
@@ -126,13 +140,13 @@ module.exports = (app) => {
 
       // https://probot.github.io/docs/github-api/#graphql-api
       // Get the node id of the issue
-      const { resource } = await context.github.query(getResource, {
-        url: context.payload.issue.html_url
-      })
+      // const { resource } = await context.github.query(getResource, {
+      //   url: context.payload.issue.html_url
+      // })
 
       // Post a comment on the issue.
-      await context.github.query(addComment, {
-        id: resource.id,
+      context.github.query(addComment, {
+        id: context.payload.issue.node_id,
         body: 'Thanks for commenting on an issue!'
       })
     } else {
@@ -151,7 +165,7 @@ module.exports = (app) => {
 
     // TODO: only on opened PR's.
     if (context.payload.issue.state === 'open') {
-      const config = await loadConfig(context)
+      const config = await context.config('relabeler.yml', { perform: false })
 
       app.log.debug('Configuration (stringify): %s', JSON.stringify(config))
 
@@ -195,9 +209,9 @@ module.exports = (app) => {
         if (doAction) {
           // https://probot.github.io/docs/github-api/#graphql-api
           // Get the node id of the issue
-          const { resource } = await context.github.query(getResource, {
-            url: context.payload.issue.html_url
-          })
+          // const { resource } = await context.github.query(getResource, {
+          //   url: context.payload.issue.html_url
+          // })
 
           if (when.do.setLabels !== undefined && when.do.setLabels !== false) {
             when.do.setLabels.forEach(async setLabel => {
@@ -212,8 +226,8 @@ module.exports = (app) => {
             app.log.debug('Comment %s', JSON.stringify(when.do.comment))
 
             // Post a comment on the issue
-            await context.github.query(addComment, {
-              id: resource.id,
+            context.github.query(addComment, {
+              id: context.payload.issue.node_id,
               body: when.do.comment
             })
           }
@@ -237,7 +251,12 @@ module.exports = (app) => {
   })
 
   async function loadConfig (context) {
+    // Will look for 'relabeler.yml' inside the '.github' folder
     const repositoryConfig = await context.config('relabeler.yml')
+
+    // Above supports default config
+    //  public async config<T> (fileName: string, defaultConfig?: T) {
+    // https://github.com/probot/probot/pull/975/files
 
     let config
 
@@ -253,6 +272,7 @@ module.exports = (app) => {
       }
     }
 
+    context.log(config, 'Loaded config')
     console.log(config)
 
     return config
