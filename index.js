@@ -134,12 +134,12 @@ module.exports = (app) => {
 
       // https://probot.github.io/docs/github-api/#graphql-api
       // Get the node id of the issue
-      // const { resource } = await context.github.query(getResource, {
+      // const { resource } = await context.github.graphql(getResource, {
       //   url: context.payload.issue.html_url
       // })
 
       // Post a comment on the issue.
-      context.github.query(addComment, {
+      context.github.graphql(addComment, {
         id: context.payload.issue.node_id,
         body: 'Thanks for commenting on an issue!'
       })
@@ -203,7 +203,7 @@ module.exports = (app) => {
         if (doAction) {
           // https://probot.github.io/docs/github-api/#graphql-api
           // Get the node id of the issue
-          // const { resource } = await context.github.query(getResource, {
+          // const { resource } = await context.github.graphql(getResource, {
           //   url: context.payload.issue.html_url
           // })
 
@@ -220,7 +220,7 @@ module.exports = (app) => {
             app.log.debug('Comment %s', JSON.stringify(when.do.comment))
 
             // Post a comment on the issue
-            context.github.query(addComment, {
+            context.github.graphql(addComment, {
               id: context.payload.issue.node_id,
               body: when.do.comment
             })
@@ -245,6 +245,9 @@ module.exports = (app) => {
   })
 
   async function loadConfig (context) {
+    // When this run using 'npm run dev' it uses the config file in the
+    // repository (for example in DebugApps repo)
+
     // Will look for 'relabeler.yml' inside the '.github' folder
     const repositoryConfig = await context.config('relabeler.yml')
 
@@ -266,7 +269,7 @@ module.exports = (app) => {
       }
     }
 
-    // context.log(config, 'Loaded config')
+    context.log(config, 'Loaded config')
     // console.log(config)
 
     return config
