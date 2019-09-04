@@ -19,7 +19,7 @@
   "devDependencies": {
     "jest": "^24.9.0",
     "nock": "^11.3.2",
-    "nodemon": "^1.19.1",
+    "nodemon": "^1.19.2",
     "smee-client": "^1.1.0",
     "standard": "^14.1.0",
     "acorn": "^7.0.0",
