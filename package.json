@@ -21,7 +21,7 @@
     "nock": "^11.3.3",
     "nodemon": "^1.19.2",
     "smee-client": "^1.1.0",
-    "standard": "^14.1.0",
+    "standard": "^14.2.0",
     "acorn": "^7.0.0",
     "snazzy": "^8.0.0"
   },
