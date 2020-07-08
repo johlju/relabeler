@@ -33,9 +33,9 @@ module.exports = (app) => {
     app.log.debug(context.payload.repositories)
   })
 
-  app.on('integration_installation.created', async context => {
+  app.on('installation.created', async context => {
     const action = context.payload.action
-    app.log.debug('integration_installation event! Action: %s', action)
+    app.log.debug('installation event! Action: %s', action)
 
     app.log.debug(context.payload.installation.repository_selection)
     app.log.debug(context.payload.repositories)
