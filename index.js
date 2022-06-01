@@ -44,7 +44,7 @@ module.exports = (app) => {
   // ['pull_request.labeled', 'pull_request.unlabeled'] (must handle state === 'open')
   // ['pull_request.synchronize', 'pull_request.reopened', 'pull_request.edited' ]
   app.on('pull_request.opened', async context => {
-    context.log({ event: context.event, action: context.payload.action })
+    context.log({ event: context.name, action: context.payload.action })
     context.log({ state: context.payload.pull_request.state })
 
     if (context.payload.pull_request.state === 'open') {
@@ -72,7 +72,7 @@ module.exports = (app) => {
         const params = context.issue({ body: 'hej' })
 
         // Post a comment on the issue
-        context.github.issues.createComment(params)
+        context.octokit.issues.createComment(params)
       } else {
         app.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
       }
@@ -80,7 +80,7 @@ module.exports = (app) => {
       const label = 'needs review'
 
       if (config.perform) {
-        context.github.issues.addLabels(context.issue({ labels: [label] }))
+        context.octokit.issues.addLabels(context.issue({ labels: [label] }))
       } else {
         app.log.debug('dry-run: Would have labeled PR #%s with a label \'%s\'', context.payload.number, label)
       }
@@ -108,7 +108,7 @@ module.exports = (app) => {
     // app.log.debug('Global node ID: %s', context.payload.node_id)
 
     if (config.perform) {
-      // context.github.issues.createComment(context.issue({body: 'hej'}))
+      // context.octokit.issues.createComment(context.issue({body: 'hej'}))
     } else {
       app.log.debug('dry-run: Would have written a comment to PR #%s', context.payload.number)
     }
@@ -116,7 +116,7 @@ module.exports = (app) => {
     const label = 'needs review'
 
     if (config.perform) {
-      // context.github.issues.addLabels(context.issue({labels: [label]}))
+      // context.octokit.issues.addLabels(context.issue({labels: [label]}))
     } else {
       app.log.debug('dry-run: Would have labeled PR #%s with a label \'%s\'', context.payload.number, label)
     }
